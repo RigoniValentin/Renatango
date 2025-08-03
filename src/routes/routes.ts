@@ -58,6 +58,8 @@ import {
   capturePreference,
   createOrder,
   createPreference,
+  getSubscriptionInfo,
+  extendUserSubscription,
 } from "@controllers/paymentController";
 import { sendResetPasswordEmail } from "@services/emailService";
 import { getExamples, saveExamples } from "@controllers/exampleController";
@@ -225,6 +227,12 @@ export default () => {
 
   // #region Coupons Routes
   router.post("/apply-coupon", verifyToken, applyCoupon);
+  router.get("/subscription-info", verifyToken, getSubscriptionInfo);
+  router.post(
+    "/admin/extend-subscription",
+    verifyToken,
+    extendUserSubscription
+  );
   // #endregion
 
   // #region Example Routes

@@ -6,6 +6,7 @@ import { UserRepository } from "@repositories/userRepository";
 import { RolesRepository } from "@repositories/rolesRepository";
 import { RolesService } from "@services/rolesService";
 import { Preference, MercadoPagoConfig } from "mercadopago";
+import { SubscriptionInfo } from "../types/SubscriptionTypes";
 
 // Crear una instancia de UserServicev
 const userRepository = new UserRepository();
@@ -55,7 +56,7 @@ export const createOrder = async (
       {
         amount: {
           currency_code: "USD",
-          value: "16.00",
+          value: "13.00",
         },
       },
     ],
@@ -358,5 +359,185 @@ export const applyCoupon = async (
   } catch (error) {
     console.error("Error applying coupon:", error);
     res.status(500).json({ message: "Error al aplicar el cupón", error });
+  }
+};
+
+// Nuevo endpoint para obtener información de la suscripción del usuario
+export const getSubscriptionInfo = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.currentUser.id;
+
+    const user = await userService.findUserById(userId);
+    if (!user) {
+      res.status(404).json({ message: "Usuario no encontrado" });
+      return;
+    }
+
+    // Verificar si el usuario tiene una suscripción
+    if (!user.subscription) {
+      res.json({
+        hasSubscription: false,
+        message: "El usuario no tiene una suscripción activa",
+      });
+      return;
+    }
+
+    const currentDate = new Date();
+    const expirationDate = new Date(user.subscription.expirationDate);
+    const paymentDate = new Date(user.subscription.paymentDate);
+
+    // Calcular días restantes
+    const timeDifference = expirationDate.getTime() - currentDate.getTime();
+    const daysRemaining = Math.ceil(timeDifference / (1000 * 3600 * 24));
+
+    // Determinar el estado de la suscripción
+    const isActive = daysRemaining > 0;
+    const isExpired = daysRemaining <= 0;
+    const isExpiringSoon = daysRemaining <= 7 && daysRemaining > 0;
+
+    // Calcular días transcurridos desde el último pago
+    const daysSincePayment = Math.floor(
+      (currentDate.getTime() - paymentDate.getTime()) / (1000 * 3600 * 24)
+    );
+
+    // Determinar el método de pago usado
+    const paymentMethod = user.subscription.transactionId.startsWith("PAY-")
+      ? "PayPal"
+      : user.subscription.transactionId === "INVITECOUPON2025"
+      ? "Cupón de Invitación"
+      : "MercadoPago";
+
+    const subscriptionInfo: SubscriptionInfo = {
+      hasSubscription: true,
+      isActive,
+      isExpired,
+      isExpiringSoon,
+      subscription: {
+        transactionId: user.subscription.transactionId,
+        paymentDate: user.subscription.paymentDate,
+        expirationDate: user.subscription.expirationDate,
+        daysRemaining: Math.max(0, daysRemaining),
+        daysSincePayment,
+        paymentMethod,
+        status: isExpired
+          ? "Expirada"
+          : isExpiringSoon
+          ? "Por expirar"
+          : "Activa",
+      },
+      user: {
+        email: user.email,
+        name: user.name,
+        roles: user.roles?.map((role) => role.name) || [],
+      },
+    };
+
+    res.json(subscriptionInfo);
+  } catch (error) {
+    console.error("Error getting subscription info:", error);
+    res.status(500).json({
+      message: "Error al obtener información de la suscripción",
+      error,
+    });
+  }
+};
+
+// Función para que el admin extienda la suscripción de un usuario por un mes
+export const extendUserSubscription = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { email } = req.body;
+    const adminUserId = req.currentUser.id;
+
+    // Verificar que el email fue proporcionado
+    if (!email) {
+      res.status(400).json({ message: "El email del usuario es requerido" });
+      return;
+    }
+
+    // Verificar que el usuario actual es admin
+    const adminUser = await userService.findUserById(adminUserId);
+    if (!adminUser) {
+      res.status(404).json({ message: "Usuario administrador no encontrado" });
+      return;
+    }
+
+    // Verificar si el usuario tiene rol de admin
+    const isAdmin = adminUser.roles?.some(
+      (role) => role.name === "admin" || role.name === "superadmin"
+    );
+
+    if (!isAdmin) {
+      res.status(403).json({
+        message:
+          "No tienes permisos para realizar esta acción. Solo los administradores pueden extender suscripciones.",
+      });
+      return;
+    }
+
+    // Buscar el usuario por email
+    const targetUser = await userService.findUserByEmail(email);
+    if (!targetUser) {
+      res.status(404).json({
+        message: `Usuario con email ${email} no encontrado`,
+      });
+      return;
+    }
+
+    // Verificar si el usuario tiene una suscripción
+    if (!targetUser.subscription) {
+      res.status(400).json({
+        message: `El usuario ${email} no tiene una suscripción para extender`,
+      });
+      return;
+    }
+
+    // Calcular la nueva fecha de expiración (extender 30 días)
+    const currentExpirationDate = new Date(
+      targetUser.subscription.expirationDate
+    );
+    const newExpirationDate = new Date(currentExpirationDate);
+    newExpirationDate.setDate(newExpirationDate.getDate() + 30);
+
+    // Actualizar la suscripción
+    const previousExpiration = new Date(targetUser.subscription.expirationDate);
+    targetUser.subscription.expirationDate = newExpirationDate;
+
+    // Guardar los cambios
+    await targetUser.save();
+
+    // Calcular días añadidos para confirmar
+    const daysAdded = Math.ceil(
+      (newExpirationDate.getTime() - previousExpiration.getTime()) /
+        (1000 * 3600 * 24)
+    );
+
+    // Respuesta exitosa
+    res.json({
+      message: `Suscripción extendida exitosamente para ${email}`,
+      details: {
+        userEmail: targetUser.email,
+        userName: targetUser.name,
+        previousExpirationDate: previousExpiration,
+        newExpirationDate: newExpirationDate,
+        daysAdded: daysAdded,
+        extendedBy: {
+          adminEmail: adminUser.email,
+          adminName: adminUser.name,
+          timestamp: new Date(),
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error extending user subscription:", error);
+    res.status(500).json({
+      message: "Error al extender la suscripción del usuario",
+      error,
+    });
   }
 };

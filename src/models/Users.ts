@@ -56,6 +56,18 @@ const UserSchema: Schema = new Schema<User>(
     capUor: { type: Boolean, default: false },
     capReh: { type: Boolean, default: false },
     capViv: { type: Boolean, default: false },
+    capTELA: { type: Boolean, default: false },
+    capNO_CONVENCIONAL: { type: Boolean, default: false },
+    capDANZA_DRAGON: { type: Boolean, default: false },
+    capPARADA_MANOS: { type: Boolean, default: false },
+    capDANZA_AEREA_ARNES: { type: Boolean, default: false },
+    capCUBO: { type: Boolean, default: false },
+    capPOLE_AEREO: { type: Boolean, default: false },
+    capRED: { type: Boolean, default: false },
+    capCONTORSION: { type: Boolean, default: false },
+    capARO: { type: Boolean, default: false },
+    capACRO_TRAINING: { type: Boolean, default: false },
+
     // Nuevos campos para recuperación de contraseña
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },

@@ -113,6 +113,17 @@ export const getUsersSubscriptionInfo = async (
         capUor: user.capUor || false,
         capReh: user.capReh || false,
         capViv: user.capViv || false,
+        capTELA: user.capTELA || false,
+        capNO_CONVENCIONAL: user.capNO_CONVENCIONAL || false,
+        capDANZA_DRAGON: user.capDANZA_DRAGON || false,
+        capPARADA_MANOS: user.capPARADA_MANOS || false,
+        capDANZA_AEREA_ARNES: user.capDANZA_AEREA_ARNES || false,
+        capCUBO: user.capCUBO || false,
+        capPOLE_AEREO: user.capPOLE_AEREO || false,
+        capRED: user.capRED || false,
+        capCONTORSION: user.capCONTORSION || false,
+        capARO: user.capARO || false,
+        capACRO_TRAINING: user.capACRO_TRAINING || false,
       };
     });
     res.json(info);
@@ -130,8 +141,26 @@ export const updateUserCapacitations = async (
   try {
     const { id } = req.params;
     // Se esperan valores booleanos para los 4 permisos de capacitación
-    const { capSeresArte, capThr, capPhr, capMat, capReh, capViv, capUor } =
-      req.body;
+    const {
+      capSeresArte,
+      capThr,
+      capPhr,
+      capMat,
+      capReh,
+      capViv,
+      capUor,
+      capTELA,
+      capNO_CONVENCIONAL,
+      capDANZA_DRAGON,
+      capPARADA_MANOS,
+      capDANZA_AEREA_ARNES,
+      capCUBO,
+      capPOLE_AEREO,
+      capRED,
+      capCONTORSION,
+      capARO,
+      capACRO_TRAINING,
+    } = req.body;
     const updatedUser = await userService.updateUser(id, {
       capSeresArte,
       capThr,
@@ -140,6 +169,17 @@ export const updateUserCapacitations = async (
       capReh,
       capViv, // Asumiendo que capViv no se actualiza aquí
       capUor, // Asumiendo que capUor no se actualiza aquí
+      capTELA,
+      capNO_CONVENCIONAL,
+      capDANZA_DRAGON,
+      capPARADA_MANOS,
+      capDANZA_AEREA_ARNES,
+      capCUBO,
+      capPOLE_AEREO,
+      capRED,
+      capCONTORSION,
+      capARO,
+      capACRO_TRAINING,
     });
     if (!updatedUser) {
       res.status(404).json({ message: "Usuario no encontrado." });
@@ -159,8 +199,26 @@ export const updateUserCapacitationsByEmail = async (
 ): Promise<void> => {
   try {
     const { email } = req.params;
-    const { capSeresArte, capThr, capPhr, capMat, capReh, capUor, capViv } =
-      req.body;
+    const {
+      capSeresArte,
+      capThr,
+      capPhr,
+      capMat,
+      capReh,
+      capUor,
+      capViv,
+      capTELA,
+      capNO_CONVENCIONAL,
+      capDANZA_DRAGON,
+      capPARADA_MANOS,
+      capDANZA_AEREA_ARNES,
+      capCUBO,
+      capPOLE_AEREO,
+      capRED,
+      capCONTORSION,
+      capARO,
+      capACRO_TRAINING,
+    } = req.body;
     const updatedUser = await userService.updateUserCapacitationsByEmail(
       email,
       {
@@ -171,6 +229,17 @@ export const updateUserCapacitationsByEmail = async (
         capReh,
         capViv,
         capUor,
+        capTELA,
+        capNO_CONVENCIONAL,
+        capDANZA_DRAGON,
+        capPARADA_MANOS,
+        capDANZA_AEREA_ARNES,
+        capCUBO,
+        capPOLE_AEREO,
+        capRED,
+        capCONTORSION,
+        capARO,
+        capACRO_TRAINING,
       } as any
     );
     if (!updatedUser) {

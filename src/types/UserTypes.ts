@@ -20,6 +20,18 @@ export interface User extends Document {
   capUor?: boolean;
   capReh?: boolean;
   capViv?: boolean;
+  capTELA?: boolean;
+  capNO_CONVENCIONAL?: boolean;
+  capDANZA_DRAGON?: boolean;
+  capPARADA_MANOS?: boolean;
+  capDANZA_AEREA_ARNES?: boolean;
+  capCUBO?: boolean;
+  capPOLE_AEREO?: boolean;
+  capRED?: boolean;
+  capCONTORSION?: boolean;
+  capARO?: boolean;
+  capACRO_TRAINING?: boolean;
+  // Campos para la suscripción
   subscription?: {
     transactionId: string;
     paymentDate: Date;
