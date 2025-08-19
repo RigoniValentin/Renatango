@@ -51,6 +51,8 @@ import {
 // Importar rutas de la tienda
 import categoryRoutes from "./categoryRoutes";
 import productRoutes from "./productRoutes";
+import eventRoutes from "./eventRoutes";
+import noticeRoutes from "./noticeRoutes";
 import {
   applyCoupon,
   cancelPayment,
@@ -254,6 +256,16 @@ export default () => {
 
   // Rutas de productos de la tienda
   router.use("/products", productRoutes);
+  // #endregion
+
+  // #region Events Routes
+  // Rutas de eventos/cronograma
+  router.use("/events", eventRoutes);
+  // #endregion
+
+  // #region Notices Routes
+  // Rutas de avisos importantes
+  router.use("/notices", noticeRoutes);
   // #endregion
 
   return router;
