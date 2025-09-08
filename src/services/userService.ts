@@ -57,6 +57,18 @@ export class UserService implements IUserService {
       capUor: boolean;
       capReh: boolean;
       capViv: boolean;
+      capTELA: boolean;
+      capNO_CONVENCIONAL: boolean;
+      capDANZA_DRAGON: boolean;
+      capPARADA_MANOS: boolean;
+      capDANZA_AEREA_ARNES: boolean;
+      capCUBO: boolean;
+      capPOLE_AEREO: boolean;
+      capRED: boolean;
+      capCONTORSION: boolean;
+      capARO: boolean;
+      capACRO_TRAINING: boolean;
+      capANCESTROS_AL_DESCUBIERTO: boolean;
     }
   ): Promise<User | null> {
     const user = await this.findUserByEmail(email);

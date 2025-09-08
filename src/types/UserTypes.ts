@@ -31,6 +31,7 @@ export interface User extends Document {
   capCONTORSION?: boolean;
   capARO?: boolean;
   capACRO_TRAINING?: boolean;
+  capANCESTROS_AL_DESCUBIERTO?: boolean;
   // Campos para la suscripción
   subscription?: {
     transactionId: string;

@@ -67,6 +67,7 @@ const UserSchema: Schema = new Schema<User>(
     capCONTORSION: { type: Boolean, default: false },
     capARO: { type: Boolean, default: false },
     capACRO_TRAINING: { type: Boolean, default: false },
+    capANCESTROS_AL_DESCUBIERTO: { type: Boolean, default: false },
 
     // Nuevos campos para recuperación de contraseña
     resetPasswordToken: { type: String },

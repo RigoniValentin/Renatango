@@ -124,6 +124,7 @@ export const getUsersSubscriptionInfo = async (
         capCONTORSION: user.capCONTORSION || false,
         capARO: user.capARO || false,
         capACRO_TRAINING: user.capACRO_TRAINING || false,
+        capANCESTROS_AL_DESCUBIERTO: user.capANCESTROS_AL_DESCUBIERTO || false,
       };
     });
     res.json(info);
@@ -160,6 +161,7 @@ export const updateUserCapacitations = async (
       capCONTORSION,
       capARO,
       capACRO_TRAINING,
+      capANCESTROS_AL_DESCUBIERTO,
     } = req.body;
     const updatedUser = await userService.updateUser(id, {
       capSeresArte,
@@ -180,6 +182,7 @@ export const updateUserCapacitations = async (
       capCONTORSION,
       capARO,
       capACRO_TRAINING,
+      capANCESTROS_AL_DESCUBIERTO,
     });
     if (!updatedUser) {
       res.status(404).json({ message: "Usuario no encontrado." });
@@ -218,6 +221,7 @@ export const updateUserCapacitationsByEmail = async (
       capCONTORSION,
       capARO,
       capACRO_TRAINING,
+      capANCESTROS_AL_DESCUBIERTO,
     } = req.body;
     const updatedUser = await userService.updateUserCapacitationsByEmail(
       email,
@@ -240,6 +244,7 @@ export const updateUserCapacitationsByEmail = async (
         capCONTORSION,
         capARO,
         capACRO_TRAINING,
+        capANCESTROS_AL_DESCUBIERTO,
       } as any
     );
     if (!updatedUser) {
