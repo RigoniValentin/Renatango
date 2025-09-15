@@ -46,3 +46,24 @@ export interface ExtendSubscriptionResponse {
     };
   };
 }
+
+export interface UpdateSubscriptionExpirationRequest {
+  email: string;
+  expirationDate: string; // Formato ISO date string (YYYY-MM-DD)
+}
+
+export interface UpdateSubscriptionExpirationResponse {
+  success: boolean;
+  message: string;
+  details: {
+    userName: string;
+    userEmail: string;
+    previousExpirationDate: Date | null;
+    newExpirationDate: Date;
+    subscriptionCreated: boolean;
+    updatedBy: {
+      adminName: string;
+      adminEmail: string;
+    };
+  };
+}

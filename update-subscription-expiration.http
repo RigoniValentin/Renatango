@@ -1,0 +1,146 @@
+### ===========================================
+### ACTUALIZACIÓN DE FECHA DE EXPIRACIÓN DE SUSCRIPCIÓN
+### ===========================================
+
+@baseUrl = http://localhost:3010/api/v1
+@adminToken = Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+### ===========================================
+### NUEVO ENDPOINT - UPDATE SUBSCRIPTION EXPIRATION
+### ===========================================
+
+### 1. Actualizar fecha de expiración de suscripción (Admin Only)
+POST {{baseUrl}}/admin/update-subscription-expiration
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "usuario@ejemplo.com",
+  "expirationDate": "2025-12-31"
+}
+
+### 2. Ejemplo con fecha válida en el futuro
+POST {{baseUrl}}/admin/update-subscription-expiration
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "user@gmail.com",
+  "expirationDate": "2026-06-30"
+}
+
+### 3. Ejemplo para crear nueva suscripción (usuario sin suscripción previa)
+POST {{baseUrl}}/admin/update-subscription-expiration
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "nuevo-usuario@ejemplo.com",
+  "expirationDate": "2025-10-15"
+}
+
+### ===========================================
+### CASOS DE ERROR - PARA TESTING
+### ===========================================
+
+### 4. Error - Email faltante
+POST {{baseUrl}}/admin/update-subscription-expiration
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "expirationDate": "2025-12-31"
+}
+
+### 5. Error - Fecha faltante
+POST {{baseUrl}}/admin/update-subscription-expiration
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "usuario@ejemplo.com"
+}
+
+### 6. Error - Formato de fecha inválido
+POST {{baseUrl}}/admin/update-subscription-expiration
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "usuario@ejemplo.com",
+  "expirationDate": "31/12/2025"
+}
+
+### 7. Error - Fecha en el pasado
+POST {{baseUrl}}/admin/update-subscription-expiration
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "usuario@ejemplo.com",
+  "expirationDate": "2020-01-01"
+}
+
+### 8. Error - Usuario no encontrado
+POST {{baseUrl}}/admin/update-subscription-expiration
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "usuario-inexistente@ejemplo.com",
+  "expirationDate": "2025-12-31"
+}
+
+### 9. Error - Usuario sin permisos de admin (usar token de usuario normal)
+POST {{baseUrl}}/admin/update-subscription-expiration
+Authorization: Bearer USER_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "email": "usuario@ejemplo.com",
+  "expirationDate": "2025-12-31"
+}
+
+### ===========================================
+### ENDPOINTS RELACIONADOS PARA COMPARACIÓN
+### ===========================================
+
+### 10. Obtener información de suscripción actual
+GET {{baseUrl}}/subscription-info
+Authorization: {{adminToken}}
+
+### 11. Endpoint anterior de extensión por 30 días (para comparar)
+POST {{baseUrl}}/admin/extend-subscription
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "usuario@ejemplo.com"
+}
+
+### ===========================================
+### RESPONSE EXAMPLES
+### ===========================================
+
+### Success Response:
+# {
+#   "success": true,
+#   "message": "Fecha de expiración actualizada correctamente",
+#   "details": {
+#     "userName": "Nombre del usuario",
+#     "userEmail": "usuario@ejemplo.com",
+#     "previousExpirationDate": "2025-08-31T23:59:59.000Z", // null si no existía
+#     "newExpirationDate": "2025-12-31T23:59:59.000Z",
+#     "subscriptionCreated": false, // true si se creó nueva suscripción
+#     "updatedBy": {
+#       "adminName": "Nombre del admin",
+#       "adminEmail": "admin@ejemplo.com"
+#     }
+#   }
+# }
+
+### Error Response:
+# {
+#   "success": false,
+#   "message": "Descripción del error"
+# }

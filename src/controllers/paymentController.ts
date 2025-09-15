@@ -6,7 +6,11 @@ import { UserRepository } from "@repositories/userRepository";
 import { RolesRepository } from "@repositories/rolesRepository";
 import { RolesService } from "@services/rolesService";
 import { Preference, MercadoPagoConfig } from "mercadopago";
-import { SubscriptionInfo } from "../types/SubscriptionTypes";
+import {
+  SubscriptionInfo,
+  UpdateSubscriptionExpirationRequest,
+  UpdateSubscriptionExpirationResponse,
+} from "../types/SubscriptionTypes";
 
 // Crear una instancia de UserServicev
 const userRepository = new UserRepository();
@@ -538,6 +542,168 @@ export const extendUserSubscription = async (
     res.status(500).json({
       message: "Error al extender la suscripción del usuario",
       error,
+    });
+  }
+};
+
+// Función para que el admin actualice la fecha de expiración específica de un usuario
+export const updateSubscriptionExpiration = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { email, expirationDate }: UpdateSubscriptionExpirationRequest =
+      req.body;
+    const adminUserId = req.currentUser.id;
+
+    // Validar que los campos requeridos están presentes
+    if (!email) {
+      res.status(400).json({
+        success: false,
+        message: "El email del usuario es requerido",
+      });
+      return;
+    }
+
+    if (!expirationDate) {
+      res.status(400).json({
+        success: false,
+        message: "La fecha de expiración es requerida",
+      });
+      return;
+    }
+
+    // Validar formato de fecha (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(expirationDate)) {
+      res.status(400).json({
+        success: false,
+        message: "El formato de fecha debe ser YYYY-MM-DD",
+      });
+      return;
+    }
+
+    // Convertir la fecha a objeto Date y validar que sea válida
+    const targetDate = new Date(expirationDate + "T23:59:59.000Z");
+    if (isNaN(targetDate.getTime())) {
+      res.status(400).json({
+        success: false,
+        message: "La fecha proporcionada no es válida",
+      });
+      return;
+    }
+
+    // Validar que la fecha esté en el futuro
+    const currentDate = new Date();
+    if (targetDate <= currentDate) {
+      res.status(400).json({
+        success: false,
+        message: "La fecha de expiración debe ser posterior a la fecha actual",
+      });
+      return;
+    }
+
+    // Verificar que el usuario actual es admin
+    const adminUser = await userService.findUserById(adminUserId);
+    if (!adminUser) {
+      res.status(404).json({
+        success: false,
+        message: "Usuario administrador no encontrado",
+      });
+      return;
+    }
+
+    // Verificar si el usuario tiene rol de admin
+    const isAdmin = adminUser.roles?.some(
+      (role) => role.name === "admin" || role.name === "superadmin"
+    );
+
+    if (!isAdmin) {
+      res.status(403).json({
+        success: false,
+        message:
+          "No tienes permisos para realizar esta acción. Solo los administradores pueden modificar suscripciones.",
+      });
+      return;
+    }
+
+    // Buscar el usuario por email
+    const targetUser = await userService.findUserByEmail(email);
+    if (!targetUser) {
+      res.status(404).json({
+        success: false,
+        message: `Usuario con email ${email} no encontrado`,
+      });
+      return;
+    }
+
+    // Obtener la fecha de expiración anterior (si existe)
+    const previousExpirationDate =
+      targetUser.subscription?.expirationDate || null;
+
+    // Variable para indicar si se creó una nueva suscripción
+    let subscriptionCreated = false;
+
+    // Verificar si el usuario tiene una suscripción existente
+    if (targetUser.subscription) {
+      // Actualizar la fecha de expiración manteniendo los demás campos
+      targetUser.subscription = {
+        transactionId:
+          targetUser.subscription.transactionId ||
+          `UPDATE_BY_ADMIN_${new Date().getFullYear()}`,
+        paymentDate: targetUser.subscription.paymentDate || new Date(),
+        expirationDate: targetDate,
+      };
+    } else {
+      // Crear nuevo objeto subscription completo
+      targetUser.subscription = {
+        transactionId: `UPDATE_BY_ADMIN_${new Date().getFullYear()}`,
+        paymentDate: new Date(),
+        expirationDate: targetDate,
+      };
+      subscriptionCreated = true;
+    }
+
+    // Guardar los cambios
+    await targetUser.save();
+
+    // Log de auditoría
+    console.log(`[AUDIT] Subscription expiration updated by admin:`, {
+      adminEmail: adminUser.email,
+      adminName: adminUser.name,
+      targetUserEmail: email,
+      targetUserName: targetUser.name,
+      previousExpirationDate,
+      newExpirationDate: targetDate,
+      subscriptionCreated,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Respuesta exitosa
+    const response: UpdateSubscriptionExpirationResponse = {
+      success: true,
+      message: "Fecha de expiración actualizada correctamente",
+      details: {
+        userName: targetUser.name,
+        userEmail: targetUser.email,
+        previousExpirationDate,
+        newExpirationDate: targetDate,
+        subscriptionCreated,
+        updatedBy: {
+          adminName: adminUser.name,
+          adminEmail: adminUser.email,
+        },
+      },
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error updating subscription expiration:", error);
+    res.status(500).json({
+      success: false,
+      message:
+        "Error interno del servidor al actualizar la fecha de expiración",
+      error: process.env.NODE_ENV === "development" ? error : undefined,
     });
   }
 };

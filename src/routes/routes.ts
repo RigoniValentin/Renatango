@@ -62,6 +62,7 @@ import {
   createPreference,
   getSubscriptionInfo,
   extendUserSubscription,
+  updateSubscriptionExpiration,
 } from "@controllers/paymentController";
 import { sendResetPasswordEmail } from "@services/emailService";
 import { getExamples, saveExamples } from "@controllers/exampleController";
@@ -234,6 +235,11 @@ export default () => {
     "/admin/extend-subscription",
     verifyToken,
     extendUserSubscription
+  );
+  router.post(
+    "/admin/update-subscription-expiration",
+    verifyToken,
+    updateSubscriptionExpiration
   );
   // #endregion
 
