@@ -75,6 +75,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         capCONTORSION: user.capCONTORSION || false,
         capARO: user.capARO || false,
         capACRO_TRAINING: user.capACRO_TRAINING || false,
+        capANCESTROS_AL_DESCUBIERTO: user.capANCESTROS_AL_DESCUBIERTO || false,
       },
       jwtSecret,
       { expiresIn: "3h" }
