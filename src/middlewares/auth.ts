@@ -18,25 +18,40 @@ export const verifyToken = async (
     req.headers.authorization?.replace("Bearer ", "") ||
     (req.query.authToken as string); // Leer el token de la URL
 
+  console.log("🔐 verifyToken middleware called");
+  console.log(
+    "📨 Authorization header:",
+    req.headers.authorization?.substring(0, 50) + "..."
+  );
+  console.log("🎫 Extracted token:", token?.substring(0, 30) + "...");
+
   if (!token) {
+    console.log("❌ No token provided");
     res.status(401).json({ message: "JWT must be provided" });
     return;
   }
 
   try {
+    console.log("🔍 Attempting to verify token...");
     const verify = jwt.verify(token, jwtSecret) as User;
+    console.log("✅ Token verified successfully for user:", verify.id);
 
     const getUser = await userService.findUserById(verify.id);
     if (!getUser) {
+      console.log("❌ User not found in database:", verify.id);
       res.status(404).json({ message: "User not found" });
       return;
     }
 
     req.currentUser = getUser;
-    console.log("Token verified, user:", req.currentUser);
+    console.log("✅ User loaded:", {
+      id: getUser._id,
+      email: getUser.email,
+      roles: getUser.roles?.map((r) => r.name),
+    });
     next();
   } catch (error: any) {
-    console.log("error :>> ", error);
+    console.log("❌ Token verification failed:", error.message);
     res.status(401).send(error.message);
   }
 };
@@ -89,13 +104,20 @@ export const getPermissions = async (
   const permissionGranted = findMethod?.permissions.find((x) =>
     mergedRolesPermissions.includes(x)
   );
+
+  // También verificar si el usuario tiene 'admingranted' (legacy permission name)
+  const hasLegacyAdmin = mergedRolesPermissions.includes("admingranted");
+
   console.log("permissionGranted :>> ", permissionGranted);
+  console.log("hasLegacyAdmin :>> ", hasLegacyAdmin);
 
   // - si no hay match, regresamos un error unauthorized
-  if (!permissionGranted) {
+  if (!permissionGranted && !hasLegacyAdmin) {
     res.status(401).send("Unauthorized");
     return;
   }
+
+  console.log("✅ Permission check passed");
   // - si todo bien next()
   next();
 };

@@ -6,8 +6,6 @@ import {
   updateUser,
   deleteUser,
   getUsersSubscriptionInfo,
-  updateUserCapacitations,
-  updateUserCapacitationsByEmail,
 } from "@controllers/userController";
 import {
   findRoles,
@@ -53,6 +51,9 @@ import categoryRoutes from "./categoryRoutes";
 import productRoutes from "./productRoutes";
 import eventRoutes from "./eventRoutes";
 import noticeRoutes from "./noticeRoutes";
+import moduleRoutes from "./moduleRoutes";
+import videoRoutes from "./videoRoutes";
+import modulePriceRoutes from "./modulePriceRoutes";
 import {
   applyCoupon,
   cancelPayment,
@@ -64,6 +65,18 @@ import {
   extendUserSubscription,
   updateSubscriptionExpiration,
 } from "@controllers/paymentController";
+import {
+  createVideoOrder,
+  captureVideoOrder,
+  createVideoPreference,
+  captureVideoPreference,
+  getUserVideoAccess,
+  checkVideoAccess,
+  checkModuleAccess,
+  getUserModules,
+  getUserVideosInModule,
+  getUserPurchasesSummary,
+} from "@controllers/videoPaymentController";
 import { sendResetPasswordEmail } from "@services/emailService";
 import { getExamples, saveExamples } from "@controllers/exampleController";
 import { getChatHistory, deleteChatHistory } from "@controllers/chatController";
@@ -103,18 +116,6 @@ export default () => {
   router.get("/users/:id", verifyToken, getPermissions, findUserById);
   router.post("/users", verifyToken, getPermissions, checkRoles, createUser);
   router.put("/users/:id", verifyToken, getPermissions, updateUser);
-  router.put(
-    "/users/:id/capacitations",
-    verifyToken,
-    getPermissions,
-    updateUserCapacitations
-  );
-  router.put(
-    "/users/email/:email/capacitations",
-    verifyToken,
-    getPermissions,
-    updateUserCapacitationsByEmail
-  );
   router.delete("/users/:id", verifyToken, getPermissions, deleteUser);
   //#endregion
 
@@ -158,7 +159,8 @@ export default () => {
   router.put("/questions/:id/reject", verifyToken, rejectQuestion);
   //#endregion
 
-  //#region Videos Routes
+  //#region Videos Routes (OLD - DEPRECATED - usando videoRoutes.ts ahora)
+  /*
   router.post(
     "/videos",
     verifyToken,
@@ -197,7 +199,7 @@ export default () => {
     checkRoles,
     deleteVideoByUrl
   );
-  //#endregion
+  */ //#endregion
 
   // #region Trainings Routes
   router.post("/trainings", verifyToken, getPermissions, createTraining);
@@ -213,6 +215,28 @@ export default () => {
 
   router.post("/create-preference", verifyToken, createPreference);
   router.get("/capture-preference", capturePreference);
+  // #endregion
+
+  // #region Video Payments Routes
+  router.post("/create-video-order", verifyToken, createVideoOrder);
+  router.get("/capture-video-order", captureVideoOrder);
+
+  router.post("/create-video-preference", verifyToken, createVideoPreference);
+  router.get("/capture-video-preference", captureVideoPreference);
+
+  // Rutas para consultar acceso a videos
+  router.get("/user/video-access", verifyToken, getUserVideoAccess);
+  router.get("/user/check-video/:videoId", verifyToken, checkVideoAccess);
+  router.get("/user/check-module/:moduleId", verifyToken, checkModuleAccess);
+
+  // Rutas adicionales para consultar compras
+  router.get("/user/modules", verifyToken, getUserModules);
+  router.get(
+    "/user/videos-in-module/:moduleId",
+    verifyToken,
+    getUserVideosInModule
+  );
+  router.get("/user/purchases-summary", verifyToken, getUserPurchasesSummary);
   // #endregion
 
   // #region Email Routes
@@ -272,6 +296,17 @@ export default () => {
   // #region Notices Routes
   // Rutas de avisos importantes
   router.use("/notices", noticeRoutes);
+  // #endregion
+
+  // #region Admin Module Routes
+  // Rutas de módulos (protegidas por admin)
+  router.use("/modules", moduleRoutes);
+  router.use("/modules", modulePriceRoutes);
+  // #endregion
+
+  // #region Admin Video Routes
+  // Rutas de videos (protegidas por admin)
+  router.use("/videos", videoRoutes);
   // #endregion
 
   return router;

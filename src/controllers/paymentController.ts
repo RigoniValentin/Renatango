@@ -52,7 +52,7 @@ export const createOrder = async (
   const baseUrl =
     process.env.NODE_ENV === "production"
       ? "https://pilatestransmissionsarah.com"
-      : "https://pilatestransmissionsarah.com";
+      : "http://localhost:3010";
 
   const order = {
     intent: "CAPTURE",
@@ -65,7 +65,7 @@ export const createOrder = async (
       },
     ],
     application_context: {
-      brand_name: "Pilates Transmission Sarah",
+      brand_name: "Tango",
       landing_page: "NO_PREFERENCE",
       user_action: "PAY_NOW",
       return_url: `${baseUrl}/api/v1/capture-order?state=${userId}`, // Ruta del backend para capturar la orden

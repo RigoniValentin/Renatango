@@ -45,36 +45,4 @@ export class UserService implements IUserService {
     // Comprueba si la fecha de expiración es mayor a la fecha actual
     return new Date(user.subscription.expirationDate) > new Date();
   }
-
-  // Nuevo método para actualizar las capacitaciones por email
-  async updateUserCapacitationsByEmail(
-    email: string,
-    capacitations: {
-      capSeresArte: boolean;
-      capThr: boolean;
-      capPhr: boolean;
-      capMat: boolean;
-      capUor: boolean;
-      capReh: boolean;
-      capViv: boolean;
-      capTELA: boolean;
-      capNO_CONVENCIONAL: boolean;
-      capDANZA_DRAGON: boolean;
-      capPARADA_MANOS: boolean;
-      capDANZA_AEREA_ARNES: boolean;
-      capCUBO: boolean;
-      capPOLE_AEREO: boolean;
-      capRED: boolean;
-      capCONTORSION: boolean;
-      capARO: boolean;
-      capACRO_TRAINING: boolean;
-      capANCESTROS_AL_DESCUBIERTO: boolean;
-    }
-  ): Promise<User | null> {
-    const user = await this.findUserByEmail(email);
-    if (!user) {
-      return null;
-    }
-    return this.userRepository.update(user.id, capacitations);
-  }
 }

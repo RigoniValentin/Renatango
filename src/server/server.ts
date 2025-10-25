@@ -29,22 +29,35 @@ if (process.env.NODE_ENV === "production") {
   app.get("*", (req, res) => {
     return res.sendFile(path.join(projectRoot, "distFront", "index.html"));
   });
-} else {
-  app.use(
-    "/",
-    express.static(path.join(projectRoot, "distFront"), { index: "index.html" })
-  );
-  app.get("*", (req, res) => {
-    return res.sendFile(path.join(projectRoot, "distFront", "index.html"));
-  });
 }
 
 // ── Agregar Socket.IO ──
 import { createServer } from "http";
+import { createServer as createHttpsServer } from "https";
 import { Server as SocketIOServer } from "socket.io";
+import fs from "fs";
+import type { Server } from "http";
 
-// Crear servidor HTTP usando la app de Express
-const httpServer = createServer(app);
+// Crear servidor HTTP o HTTPS según el entorno
+let httpServer: Server;
+
+if (process.env.NODE_ENV === "production") {
+  // En producción usar HTTP normal
+  httpServer = createServer(app);
+} else {
+  // En desarrollo usar HTTPS con certificados autofirmados
+  try {
+    const options = {
+      key: fs.readFileSync(path.join(projectRoot, "key.pem")),
+      cert: fs.readFileSync(path.join(projectRoot, "cert.pem")),
+    };
+    httpServer = createHttpsServer(options, app);
+    console.log("🔒 HTTPS habilitado en desarrollo");
+  } catch (error) {
+    console.log("⚠️ Certificados SSL no encontrados, usando HTTP");
+    httpServer = createServer(app);
+  }
+}
 
 // Inicializar Socket.IO
 const io = new SocketIOServer(httpServer, {

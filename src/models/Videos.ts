@@ -25,4 +25,6 @@ const VideoSchema: Schema = new Schema<Video>(
   { timestamps: true, versionKey: false }
 );
 
-export const VideoModel = mongoose.model<Video>("Video", VideoSchema);
+// Evitar error de modelo duplicado en desarrollo (hot-reload)
+export const VideoModel =
+  mongoose.models.Video || mongoose.model<Video>("Video", VideoSchema);

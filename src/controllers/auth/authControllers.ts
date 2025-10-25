@@ -21,9 +21,10 @@ export const registerUser = async (
       return;
     }
 
+    // Asignar automáticamente el rol "user" si no se especifica roles
+    // El middleware checkRoles ya habrá convertido "user" al ID del rol
     const newUser = await userService.createUser({
       ...req.body,
-      role: "guest",
     });
 
     res.status(201).json(newUser);
@@ -48,6 +49,9 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Log para verificar qué roles tiene el usuario
+    console.log("User roles:", JSON.stringify(user.roles, null, 2));
+
     const token = jwt.sign(
       {
         id: user._id,
@@ -57,32 +61,18 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         nationality: user.nationality,
         locality: user.locality,
         age: user.age,
-        capSeresArte: user.capSeresArte || false,
-        capThr: user.capThr || false,
-        capPhr: user.capPhr || false,
-        capMat: user.capMat || false,
-        capUor: user.capUor || false,
-        capReh: user.capReh || false,
-        capViv: user.capViv || false,
-        capTELA: user.capTELA || false,
-        capNO_CONVENCIONAL: user.capNO_CONVENCIONAL || false,
-        capDANZA_DRAGON: user.capDANZA_DRAGON || false,
-        capPARADA_MANOS: user.capPARADA_MANOS || false,
-        capDANZA_AEREA_ARNES: user.capDANZA_AEREA_ARNES || false,
-        capCUBO: user.capCUBO || false,
-        capPOLE_AEREO: user.capPOLE_AEREO || false,
-        capRED: user.capRED || false,
-        capCONTORSION: user.capCONTORSION || false,
-        capARO: user.capARO || false,
-        capACRO_TRAINING: user.capACRO_TRAINING || false,
-        capANCESTROS_AL_DESCUBIERTO: user.capANCESTROS_AL_DESCUBIERTO || false,
       },
       jwtSecret,
       { expiresIn: "3h" }
     );
 
-    //const decodedPayload = jwt.decode(token);
-    //console.log("Payload decodificado:", decodedPayload);
+    // Decodificar el token para verificar qué se está enviando
+    const decodedPayload = jwt.decode(token);
+    console.log(
+      "Payload decodificado:",
+      JSON.stringify(decodedPayload, null, 2)
+    );
+
     console.log("MercadoPago Access Token:", process.env.MP_ACCESS_TOKEN);
     res.json(token);
   } catch (error) {

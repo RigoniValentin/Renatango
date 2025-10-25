@@ -11,21 +11,29 @@ export const checkRoles = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
+  console.log("🔧 checkRoles middleware called");
+  console.log("🛣️ Request path:", req.path);
+  console.log("📋 Request body:", req.body);
+
   const roles: string[] = req.body && req.body?.roles ? req.body.roles : [];
+  // Si no se especifican roles, asignar automáticamente "user"
   const role = Array.isArray(roles) && roles.length != 0 ? roles : ["user"];
-  console.log("req.body", role);
+  console.log("req.body roles to check:", role);
 
   try {
     const findRoles = await rolesService.findRoles({ name: { $in: role } });
+    console.log("🔍 Found roles:", findRoles.length);
 
     if (findRoles.length === 0) {
+      console.log("❌ No roles found, returning 404");
       res.status(404).json({ message: "Role not found" });
-      return; // Retorna sin devolver un Response
+      return;
     }
 
     req.body.roles = findRoles.map((x) => x._id);
 
     console.log("req.body.roles :>>", req.body.roles);
+    console.log("✅ checkRoles passed, calling next()");
 
     next();
   } catch (error) {

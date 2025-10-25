@@ -6,3 +6,7 @@ npm-debug.log
 package-lock.json
 dist
 .vscode
+
+# Certificados SSL para desarrollo
+key.pem
+cert.pem
