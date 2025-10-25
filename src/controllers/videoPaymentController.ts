@@ -51,8 +51,8 @@ console.log("🔑 MercadoPago Config:", {
   tokenPreview: MP_ACCESS_TOKEN_ENV?.substring(0, 30) + "...",
   baseUrl:
     process.env.NODE_ENV === "production"
-      ? "https://pilatestransmissionsarah.com"
-      : "https://localhost:3010",
+      ? "https://renatango.com"
+      : "https://localhost:3014",
 });
 
 const mercadoPagoClient = new MercadoPagoConfig({
@@ -139,8 +139,8 @@ export const createVideoOrder = async (
 
     const baseUrl =
       process.env.NODE_ENV === "production"
-        ? "https://pilatestransmissionsarah.com"
-        : "https://localhost:3010";
+        ? "https://renatango.com"
+        : "https://localhost:3014";
 
     const order = {
       intent: "CAPTURE",
@@ -256,7 +256,7 @@ export const captureVideoOrder = async (
 
     const successRedirect =
       process.env.NODE_ENV === "production"
-        ? `https://pilatestransmissionsarah.com/pagoAprobado`
+        ? `https://renatango.com/pagoAprobado`
         : `https://localhost:5173/pagoAprobado`;
 
     res.redirect(successRedirect);
@@ -305,13 +305,13 @@ export const createVideoPreference = async (req: Request, res: Response) => {
     // URLs para MercadoPago
     const frontendUrl =
       process.env.NODE_ENV === "production"
-        ? "https://pilatestransmissionsarah.com"
+        ? "https://renatango.com"
         : "https://localhost:5173"; // HTTPS en desarrollo
 
     const backendUrl =
       process.env.NODE_ENV === "production"
-        ? "https://pilatestransmissionsarah.com"
-        : "https://localhost:3010"; // Backend ahora también usa HTTPS en desarrollo
+        ? "https://renatango.com"
+        : "https://localhost:3014"; // Backend ahora también usa HTTPS en desarrollo
 
     const successUrl = `${backendUrl}/api/v1/capture-video-preference?state=${userId}&itemType=${itemType}&itemId=${itemId}&price=${unit_price}`;
 
@@ -409,7 +409,7 @@ export const captureVideoPreference = async (
 
     const successRedirect =
       process.env.NODE_ENV === "production"
-        ? `https://pilatestransmissionsarah.com/pagoAprobado`
+        ? `https://renatango.com/pagoAprobado`
         : `https://localhost:5173/pagoAprobado`;
 
     res.redirect(successRedirect);
