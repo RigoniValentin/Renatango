@@ -54,6 +54,7 @@ import noticeRoutes from "./noticeRoutes";
 import moduleRoutes from "./moduleRoutes";
 import videoRoutes from "./videoRoutes";
 import modulePriceRoutes from "./modulePriceRoutes";
+import infoPageRoutes from "./infoPageRoutes";
 import {
   applyCoupon,
   cancelPayment,
@@ -296,6 +297,10 @@ export default () => {
   // #region Notices Routes
   // Rutas de avisos importantes
   router.use("/notices", noticeRoutes);
+  // #endregion
+
+  // #region Info Pages Routes
+  router.use("/info-pages", infoPageRoutes);
   // #endregion
 
   // #region Admin Module Routes
