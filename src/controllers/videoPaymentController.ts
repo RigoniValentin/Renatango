@@ -116,6 +116,14 @@ export const createVideoOrder = async (
     const userId = req.currentUser.id;
     const { itemType, itemId, itemTitle, itemPrice } = req.body;
 
+    const normalizedPrice = Number(itemPrice);
+    if (!Number.isFinite(normalizedPrice) || normalizedPrice <= 0) {
+      res.status(400).json({
+        message: "Precio inválido recibido para la orden de PayPal",
+      });
+      return;
+    }
+
     // Validar que el usuario no haya comprado ya este item
     if (itemType === "video") {
       const hasAccess = await videoPurchaseService.hasAccessToVideo(
@@ -148,7 +156,7 @@ export const createVideoOrder = async (
         {
           amount: {
             currency_code: "USD",
-            value: itemPrice.toFixed(2), // itemPrice ya viene en USD desde el frontend
+            value: normalizedPrice.toFixed(2),
           },
           description: itemTitle,
         },
@@ -187,8 +195,23 @@ export const createVideoOrder = async (
     console.log("PayPal video order created:", response.data);
     res.json(response.data);
   } catch (error) {
-    console.error("Error creating video order:", error);
-    res.status(500).json({ message: "Error creating order", error });
+    if (axios.isAxiosError(error)) {
+      console.error("Error creating video order - PayPal response:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        headers: error.response?.headers,
+      });
+
+      res.status(500).json({
+        message: "Error creating order",
+        paypalStatus: error.response?.status,
+        paypalData: error.response?.data,
+      });
+      return;
+    }
+
+    console.error("Unexpected error creating video order:", error);
+    res.status(500).json({ message: "Error creating order" });
   }
 };
 
